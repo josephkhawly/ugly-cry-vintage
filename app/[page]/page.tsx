@@ -4,6 +4,11 @@ import { notFound } from 'next/navigation'
 import Prose from '@/components/Prose'
 import { getPage } from '@/lib/shopify'
 
+// @next-codemod-ignore Cache Components adoption: this segment temporarily allows blocking.
+// Remove this opt-out after verifying the segment passes validation without it.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 const RESERVED_PAGE_HANDLES = new Set([
   'admin',
   'account',

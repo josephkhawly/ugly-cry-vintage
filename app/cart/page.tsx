@@ -3,6 +3,11 @@ import Link from 'next/link'
 
 import { CartContent } from '@/components/cart/CartLines'
 
+// @next-codemod-ignore Cache Components adoption: this segment temporarily allows blocking.
+// Remove this opt-out after verifying the segment passes validation without it.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 export const metadata: Metadata = {
   title: 'Cart | Ugly Cry Vintage',
   description: 'Your shopping cart',

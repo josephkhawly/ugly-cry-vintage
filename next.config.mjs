@@ -3,6 +3,7 @@ import { withBotId } from 'botid/next/config'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  cacheComponents: true,
   images: {
     qualities: [60, 75],
     minimumCacheTTL: 2678400, // 31 days
