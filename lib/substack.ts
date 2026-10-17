@@ -1,12 +1,13 @@
 import { XMLParser } from 'fast-xml-parser'
 import { decode } from 'html-entities'
+import { cacheLife, cacheTag } from 'next/cache'
 
 interface SubstackPost {
-  title: string
-  link: string
-  pubDate: string
   description: string
+  link: string
   previewImage?: string
+  pubDate: string
+  title: string
 }
 
 function extractImage(item: any): string | null {
@@ -22,9 +23,11 @@ function extractImage(item: any): string | null {
 }
 
 export async function fetchSubstackPosts(): Promise<SubstackPost[]> {
-  const res = await fetch('https://uglycryvintage.substack.com/feed', {
-    next: { revalidate: 3600 },
-  })
+  'use cache'
+  cacheLife('hours')
+  cacheTag('blog')
+
+  const res = await fetch('https://uglycryvintage.substack.com/feed')
 
   if (!res.ok) {
     throw new Error('Failed to fetch Substack feed')

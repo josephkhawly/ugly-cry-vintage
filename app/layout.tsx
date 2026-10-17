@@ -8,10 +8,6 @@ import Script from 'next/script'
 import { AppShell } from './app-shell'
 import './globals.css'
 
-// @next-codemod-ignore Cache Components adoption: this segment temporarily allows blocking.
-// Remove this opt-out after verifying the segment passes validation without it.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
-export const instant = false;
 
 const roboto = Roboto({
   weight: ['400', '500', '700'],

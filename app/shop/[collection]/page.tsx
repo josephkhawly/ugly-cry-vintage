@@ -1,13 +1,10 @@
+import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
+import { Suspense } from 'react'
+
 import { ProductListing, resolveSort } from '@/components/ProductListing'
 import { parsePlpFilters } from '@/lib/plp-filters'
 import { getCollection, getPlpListing } from '@/lib/shopify'
-import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
-
-// @next-codemod-ignore Cache Components adoption: this segment temporarily allows blocking.
-// Remove this opt-out after verifying the segment passes validation without it.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
-export const instant = false;
 
 export async function generateMetadata(props: {
   params: Promise<{ collection: string }>
@@ -24,17 +21,20 @@ export async function generateMetadata(props: {
   }
 }
 
-export default async function CategoryPage(props: {
+interface CategoryContentProps {
   params: Promise<{ collection: string }>
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
-}) {
-  const searchParams = (await props.searchParams) ?? {}
-  const params = await props.params
-  const sortParam = typeof searchParams.sort === 'string' ? searchParams.sort : undefined
+}
+
+async function CategoryContent({ params, searchParams }: CategoryContentProps) {
+  const resolvedSearchParams = (await searchParams) ?? {}
+  const resolvedParams = await params
+  const sortParam =
+    typeof resolvedSearchParams.sort === 'string' ? resolvedSearchParams.sort : undefined
   const { reverse, sortKey } = resolveSort(sortParam)
-  const filters = parsePlpFilters(searchParams)
+  const filters = parsePlpFilters(resolvedSearchParams)
   const { collection, facets, products } = await getPlpListing({
-    collectionHandle: params.collection,
+    collectionHandle: resolvedParams.collection,
     filters,
     reverse,
     sortKey,
@@ -44,12 +44,29 @@ export default async function CategoryPage(props: {
 
   return (
     <ProductListing
-      actionPath={`/shop/${params.collection}`}
+      actionPath={`/shop/${resolvedParams.collection}`}
       facets={facets}
       filters={filters}
       products={products}
       sort={sortParam ?? null}
       title={collection.title}
     />
+  )
+}
+
+export default function CategoryPage(props: CategoryContentProps) {
+  return (
+    <Suspense fallback={<CategorySkeleton />}>
+      <CategoryContent params={props.params} searchParams={props.searchParams} />
+    </Suspense>
+  )
+}
+
+function CategorySkeleton() {
+  return (
+    <section>
+      <h1 className='mb-8 pt-16 text-center text-4xl sm:pt-24 sm:text-6xl'>Loading…</h1>
+      <p className='px-2 py-3 text-lg'>Loading products…</p>
+    </section>
   )
 }
