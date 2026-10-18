@@ -2,7 +2,6 @@
 @plugin '@tailwindcss/typography';
 
 @theme {
-  --color-dark-magenta: #601e1e;
   --color-burnt-orange: #d74712;
   --color-espresso: #301b05;
   --color-teal: #809fa0;
@@ -37,10 +36,6 @@
   [role='button']:not(:disabled) {
     cursor: pointer;
   }
-}
-
-@utility text-balance {
-  text-wrap: balance;
 }
 
 /* Hydrogen cart drawer shell — see hydrogen-cart-drawer/references/css.md */
@@ -99,7 +94,6 @@ body:has(dialog#filter-drawer[open]) {
   overscroll-behavior: none;
 }
 
-/* Filter drawer — mirror of cart drawer, slides from the left */
 dialog#filter-drawer {
   position: fixed;
   inset-block: 0;

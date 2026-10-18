@@ -120,7 +120,6 @@ function eraQueryTerms(era: string): string[] {
   return era === '00s' ? ['00s', 'y2k'] : [era]
 }
 
-/** Numeric id from `gid://shopify/Collection/123`. */
 export function shopifyGidToId(gid: string): string {
   return gid.slice(gid.lastIndexOf('/') + 1)
 }

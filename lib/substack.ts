@@ -50,10 +50,8 @@ export async function fetchSubstackPosts(): Promise<SubstackPost[]> {
 }
 
 export function extractPreview(html: string, maxLength = 280): string {
-  // Decode all HTML entities (&amp;, &#39;, &nbsp;, etc.)
   const decoded = decode(html, { level: 'html5' })
 
-  // Strip HTML tags
   const text = decoded
     .replace(/<[^>]*>/g, ' ')
     .replace(/\s+/g, ' ')
@@ -61,7 +59,6 @@ export function extractPreview(html: string, maxLength = 280): string {
 
   if (text.length <= maxLength) return text
 
-  // Try to break at a sentence boundary
   const truncated = text.slice(0, maxLength)
   const lastPeriod = truncated.lastIndexOf('.')
 
