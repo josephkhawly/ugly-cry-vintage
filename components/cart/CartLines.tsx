@@ -21,11 +21,20 @@ type CartProductWithAttributes = NonNullable<CartLine['merchandise']>['product']
   size?: ShopifyCategoryMetafield
 }
 
-function CartErrorBanner() {
+function CartErrorBanner({ lines }: { lines: CartLine[] }) {
   const errors = useCart((state) => state.errors)
   const messages = [
     ...errors.network.map((error) => error.message),
     ...errors.cart.userErrors.map((error) => error.message),
+    ...errors.cart.warnings.map((warning) => warning.message),
+    ...Array.from(errors.lines.entries()).flatMap(([lineId, group]) =>
+      lines.some((line) => line.id === lineId)
+        ? []
+        : [
+            ...group.userErrors.map((error) => error.message),
+            ...group.warnings.map((warning) => warning.message),
+          ],
+    ),
   ].filter(Boolean)
 
   if (messages.length === 0) return null
@@ -48,6 +57,12 @@ function LineItem({ line }: { line: CartLine }) {
   const lineErrors = useCart((state) => state.errors.lines)
   const isPending = pendingLines.has(line.id)
   const errorGroup = lineErrors.get(line.id)
+  const errorMessages = errorGroup
+    ? [
+        ...errorGroup.userErrors.map((error) => error.message),
+        ...errorGroup.warnings.map((warning) => warning.message),
+      ]
+    : []
   const errorId = `cart-line-error-${line.id}`
   const merchandise = line.merchandise
   const selectedOptions = merchandise?.selectedOptions ?? []
@@ -125,16 +140,16 @@ function LineItem({ line }: { line: CartLine }) {
         >
           <input type='hidden' {...register('lineId', { value: line.id })} />
           <button
-            aria-describedby={errorGroup ? errorId : undefined}
+            aria-describedby={errorMessages.length > 0 ? errorId : undefined}
             aria-label={`Remove ${title} from cart`}
             className='text-espresso text-sm underline'
             {...register('remove')}
           >
             Remove
           </button>
-          {errorGroup?.userErrors.length ? (
+          {errorMessages.length > 0 ? (
             <p className='text-burnt-orange max-w-40 text-right text-xs' id={errorId} role='alert'>
-              {errorGroup.userErrors.map((error) => error.message).join(' ')}
+              {errorMessages.join(' ')}
             </p>
           ) : null}
         </form>
@@ -182,7 +197,7 @@ function CartLinesBody({ variant }: { variant: 'drawer' | 'page' }) {
   if (lines.length === 0) {
     return (
       <div className='mt-12 flex w-full flex-col items-center justify-center overflow-hidden'>
-        <CartErrorBanner />
+        <CartErrorBanner lines={lines} />
         <p className='text-center text-2xl font-bold'>Your cart is empty.</p>
         {variant === 'page' ? (
           <Link className='font-subheading mt-4 text-sm uppercase underline' href='/shop'>
@@ -195,7 +210,7 @@ function CartLinesBody({ variant }: { variant: 'drawer' | 'page' }) {
 
   return (
     <div className='flex h-full min-h-0 flex-col justify-between overflow-hidden'>
-      <CartErrorBanner />
+      <CartErrorBanner lines={lines} />
       <ul className='min-h-0 grow overflow-auto py-2'>
         {lines.map((line) => (
           <LineItem key={line.id} line={line} />

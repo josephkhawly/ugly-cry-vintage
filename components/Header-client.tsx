@@ -4,7 +4,7 @@ import type { Menu } from '@/lib/shopify/types'
 import clsx from 'clsx'
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import type * as React from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { HiChevronDown, HiMagnifyingGlass, HiOutlineBars3 } from 'react-icons/hi2'
@@ -23,10 +23,8 @@ export function HeaderClient({ items, shopItems }: HeaderClientProps) {
   const [panel, setPanel] = useState<Panel | null>(null)
   const [content, setContent] = useState<Panel | null>(null)
   const [expanded, setExpanded] = useState(false)
-  const [query, setQuery] = useState('')
   const [shopOpen, setShopOpen] = useState(false)
   const pathname = usePathname()
-  const router = useRouter()
   const panelRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -54,14 +52,6 @@ export function HeaderClient({ items, shopItems }: HeaderClientProps) {
   function toggleSearch() {
     if (panel === 'search') close()
     else open('search')
-  }
-
-  function submitSearch(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const trimmed = query.trim()
-    close()
-    setQuery('')
-    router.push(trimmed ? `/search?q=${encodeURIComponent(trimmed)}` : '/search')
   }
 
   function onDrawerTransitionEnd(event: React.TransitionEvent<HTMLDivElement>) {
@@ -247,21 +237,21 @@ export function HeaderClient({ items, shopItems }: HeaderClientProps) {
 
                 {content === 'search' ? (
                   <form
+                    action='/search'
                     className='flex items-center gap-4 border-t border-black px-5 py-4'
-                    onSubmit={submitSearch}
+                    method='get'
+                    role='search'
                   >
                     <input
                       className='font-subheading w-full bg-transparent text-sm uppercase outline-none placeholder:text-black/40 focus-visible:ring-2 focus-visible:ring-black/40'
-                      onChange={(event) => setQuery(event.target.value)}
+                      name='q'
                       placeholder='Type to search'
                       ref={searchInputRef}
                       type='search'
-                      value={query}
                     />
                     <button
                       className='font-subheading shrink-0 text-sm text-black/40 uppercase transition-colors hover:text-black'
-                      onClick={() => setQuery('')}
-                      type='button'
+                      type='reset'
                     >
                       Clear
                     </button>
