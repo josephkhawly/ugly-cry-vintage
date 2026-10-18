@@ -52,10 +52,11 @@ export async function subscribeToNewsletter(
     const result = await subscribeEmailToNewsletter(email)
 
     if (result.status !== 'already_subscribed') {
-      const token = createNewsletterConfirmToken(email, result.customerId)
+      const token = createNewsletterConfirmToken(result.customerId)
       await sendNewsletterConfirmationEmail({
-        email,
         confirmUrl: buildNewsletterConfirmUrl(token),
+        customerId: result.customerId,
+        email,
       })
     }
 

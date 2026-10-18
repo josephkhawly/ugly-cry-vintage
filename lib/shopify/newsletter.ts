@@ -1,7 +1,7 @@
 import { getPublicStoreDomain } from '../env'
 import { ensureStartsWith } from '../utils'
 
-const ADMIN_API_VERSION = '2024-07'
+const ADMIN_API_VERSION = '2026-10'
 
 const CUSTOMER_CREATE_MUTATION = /* GraphQL */ `
   mutation customerCreate($input: CustomerInput!) {
