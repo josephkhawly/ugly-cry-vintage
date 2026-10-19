@@ -5,10 +5,8 @@ import { ProductCardQuickAdd } from './ProductCard-client'
 import { Product } from '@/lib/shopify/types'
 
 export default function ProductCard({ product }: { product: Product }) {
-  const { availableForSale, featuredImage, handle, images, priceRange, sizes, title, variants } =
-    product
+  const { availableForSale, featuredImage, handle, images, priceRange, title, variants } = product
   const hoverImage = images.find((image) => image?.url && image.url !== featuredImage.url)
-  const size = sizes[0]
   const variantId = variants[0]?.id
 
   return (
@@ -38,7 +36,7 @@ export default function ProductCard({ product }: { product: Product }) {
               <span className='bg-espresso rounded-full p-3 text-white uppercase'>Sold Out</span>
             </div>
           ) : variantId ? (
-            <ProductCardQuickAdd size={size} variantId={variantId} />
+            <ProductCardQuickAdd product={product} />
           ) : null}
         </div>
         <Link className='flex flex-col items-start' href={`/product/${handle}`}>
