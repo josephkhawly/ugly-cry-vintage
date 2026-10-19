@@ -1,7 +1,7 @@
 import type { ProductColor } from '@/lib/shopify/category-attributes'
 import type { Product } from '@/lib/shopify/types'
 
-export const ERA_ORDER = ['40s', '50s', '60s', '70s', '80s', '90s', '00s'] as const
+const ERA_ORDER = ['40s', '50s', '60s', '70s', '80s', '90s', '00s'] as const
 
 export type Era = (typeof ERA_ORDER)[number]
 
@@ -28,7 +28,7 @@ const EMPTY_FACETS: PlpFacets = {
   types: [],
 }
 
-export function paramList(value: string | string[] | undefined): string[] {
+function paramList(value: string | string[] | undefined): string[] {
   if (!value) return []
   const values = Array.isArray(value) ? value : [value]
   return values.map((entry) => entry.trim()).filter(Boolean)
@@ -45,7 +45,7 @@ export function parsePlpFilters(searchParams: {
   }
 }
 
-export function productEras(product: Product): Era[] {
+function productEras(product: Product): Era[] {
   const haystack = `${product.title} ${product.handle} ${product.tags.join(' ')}`
   const found = new Set<Era>()
 
@@ -124,10 +124,6 @@ export function shopifyGidToId(gid: string): string {
   return gid.slice(gid.lastIndexOf('/') + 1)
 }
 
-/**
- * Storefront `products(query:)` search string.
- * Type + era run server-side; size/color need a post-filter (or Search & Discovery filters).
- */
 export function toStorefrontQuery(filters: PlpFilters, collectionId?: string): string | undefined {
   const clauses: string[] = []
 
