@@ -11,14 +11,5 @@ export const mediaFragment = gql(`
         width
       }
     }
-    ... on Video {
-      sources {
-        format
-        height
-        mimeType
-        url
-        width
-      }
-    }
   }
 `)

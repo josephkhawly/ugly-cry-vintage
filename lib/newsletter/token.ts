@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from 'crypto'
 
-export type NewsletterConfirmPayload = {
+type NewsletterConfirmPayload = {
   customerId: string
   exp: number
 }
