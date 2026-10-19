@@ -6,7 +6,5 @@ export const {
   CartProvider,
   useCart,
   useSuspenseCart,
-  useOptionalCart,
-  useCartActions,
   useCartForm,
 } = createCartComponents<typeof cartHandlers>()

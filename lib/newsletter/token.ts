@@ -1,7 +1,6 @@
 import { createHmac, timingSafeEqual } from 'crypto'
 
 export type NewsletterConfirmPayload = {
-  email: string
   customerId: string
   exp: number
 }
@@ -36,12 +35,8 @@ function sign(payloadPart: string): string {
   return toBase64Url(createHmac('sha256', getSecret()).update(payloadPart).digest())
 }
 
-export function createNewsletterConfirmToken(
-  email: string,
-  customerId: string,
-): string {
+export function createNewsletterConfirmToken(customerId: string): string {
   const payload: NewsletterConfirmPayload = {
-    email: email.trim().toLowerCase(),
     customerId,
     exp: Date.now() + TOKEN_TTL_MS,
   }
@@ -74,7 +69,6 @@ export function verifyNewsletterConfirmToken(
     ) as NewsletterConfirmPayload
 
     if (
-      !payload.email ||
       !payload.customerId ||
       typeof payload.exp !== 'number' ||
       payload.exp < Date.now()

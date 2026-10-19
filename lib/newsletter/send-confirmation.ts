@@ -80,11 +80,13 @@ function sleep(ms: number): Promise<void> {
 }
 
 export async function sendNewsletterConfirmationEmail({
-  email,
   confirmUrl,
+  customerId,
+  email,
 }: {
-  email: string
   confirmUrl: string
+  customerId: string
+  email: string
 }): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) {
@@ -125,7 +127,7 @@ export async function sendNewsletterConfirmationEmail({
   `
 
   // 5-min idempotency window; completed different-body replay = success; in-flight 409 retries once.
-  const idempotencyKey = `newsletter-confirm/${email}/${Math.floor(Date.now() / (1000 * 60 * 5))}`
+  const idempotencyKey = `newsletter-confirm/${customerId}/${Math.floor(Date.now() / (1000 * 60 * 5))}`
   const payload = {
     from: getFromAddress(),
     to: [email],
