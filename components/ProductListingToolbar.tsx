@@ -1,13 +1,12 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import type * as React from 'react'
 import { useRef } from 'react'
 import { HiOutlineXMark } from 'react-icons/hi2'
 
 import { sorting } from '@/lib/constants'
-import { hasActiveFilters } from '@/lib/plp-filters'
-import type { PlpFacets, PlpFilters } from '@/lib/plp-filters'
+import { hasActiveFilters, type PlpFacets, type PlpFilters } from '@/lib/plp-filters'
 
 const FILTER_DRAWER_ID = 'filter-drawer'
 
@@ -25,7 +24,6 @@ export function ProductListingToolbar({
   sort,
 }: ProductListingToolbarProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
-  const router = useRouter()
   const active = hasActiveFilters(filters)
 
   function openDrawer() {
@@ -36,34 +34,8 @@ export function ProductListingToolbar({
     dialogRef.current?.close()
   }
 
-  function onSortChange(event: React.ChangeEvent<HTMLSelectElement>) {
-    const params = new URLSearchParams()
-    appendFilters(params, filters)
-    if (event.target.value) params.set('sort', event.target.value)
-    const query = params.toString()
-    router.push(query ? `${actionPath}?${query}` : actionPath)
-  }
-
-  function applyFilters(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const formData = new FormData(event.currentTarget)
-    const params = new URLSearchParams()
-
-    for (const [key, value] of formData.entries()) {
-      if (typeof value === 'string' && value) params.append(key, value)
-    }
-
-    const query = params.toString()
-    closeDrawer()
-    router.push(query ? `${actionPath}?${query}` : actionPath)
-  }
-
-  function clearFilters() {
-    const params = new URLSearchParams()
-    if (sort && sort !== defaultSortSlug()) params.set('sort', sort)
-    const query = params.toString()
-    closeDrawer()
-    router.push(query ? `${actionPath}?${query}` : actionPath)
+  function submitSort(event: React.ChangeEvent<HTMLSelectElement>) {
+    event.currentTarget.form?.requestSubmit()
   }
 
   return (
@@ -78,21 +50,30 @@ export function ProductListingToolbar({
         {active ? 'Filters' : 'Filter'}
       </button>
 
-      <label className='font-subheading flex items-center gap-2 text-sm tracking-wide uppercase'>
-        <span className='sr-only'>Sort</span>
-        <select
-          className='cursor-pointer border border-black bg-transparent px-3 py-2'
-          defaultValue={sort ?? defaultSortSlug()}
-          key={sort ?? defaultSortSlug()}
-          onChange={onSortChange}
-        >
-          {sorting.map((item) => (
-            <option key={item.slug ?? 'default'} value={item.slug ?? ''}>
-              {item.title}
-            </option>
-          ))}
-        </select>
-      </label>
+      <form action={actionPath} method='get'>
+        <FilterQueryInputs filters={filters} />
+        <label className='font-subheading flex items-center gap-2 text-sm tracking-wide uppercase'>
+          <span className='sr-only'>Sort</span>
+          <select
+            className='cursor-pointer border border-black bg-transparent px-3 py-2'
+            defaultValue={sort ?? defaultSortSlug()}
+            key={sort ?? defaultSortSlug()}
+            name='sort'
+            onChange={submitSort}
+          >
+            {sorting.map((item) => (
+              <option key={item.slug ?? 'default'} value={item.slug ?? ''}>
+                {item.title}
+              </option>
+            ))}
+          </select>
+          <noscript>
+            <button className='cursor-pointer underline underline-offset-4' type='submit'>
+              Sort
+            </button>
+          </noscript>
+        </label>
+      </form>
 
       <dialog
         aria-labelledby='filter-drawer-title'
@@ -115,7 +96,12 @@ export function ProductListingToolbar({
           </button>
         </div>
 
-        <form className='flex min-h-0 flex-1 flex-col overflow-hidden' onSubmit={applyFilters}>
+        <form
+          action={actionPath}
+          className='flex min-h-0 flex-1 flex-col overflow-hidden'
+          method='get'
+          onSubmit={closeDrawer}
+        >
           {sort && sort !== defaultSortSlug() ? (
             <input name='sort' type='hidden' value={sort} />
           ) : null}
@@ -127,13 +113,13 @@ export function ProductListingToolbar({
           </div>
 
           <div className='flex shrink-0 gap-3 border-t border-black/20 p-6'>
-            <button
-              className='font-subheading flex-1 cursor-pointer rounded-full border border-black px-4 py-3 text-sm tracking-wide uppercase'
-              onClick={clearFilters}
-              type='button'
+            <Link
+              className='font-subheading flex-1 cursor-pointer rounded-full border border-black px-4 py-3 text-center text-sm tracking-wide uppercase'
+              href={clearFiltersHref(actionPath, sort)}
+              onClick={closeDrawer}
             >
               Clear
-            </button>
+            </Link>
             <button
               className='font-subheading flex-1 cursor-pointer rounded-full border border-black bg-black px-4 py-3 text-sm tracking-wide text-white uppercase'
               type='submit'
@@ -151,11 +137,30 @@ function defaultSortSlug() {
   return sorting[0]?.slug ?? ''
 }
 
-function appendFilters(params: URLSearchParams, filters: PlpFilters) {
-  for (const value of filters.size) params.append('size', value)
-  for (const value of filters.color) params.append('color', value)
-  for (const value of filters.type) params.append('type', value)
-  for (const value of filters.era) params.append('era', value)
+function clearFiltersHref(actionPath: string, sort: string | null) {
+  const params = new URLSearchParams()
+  if (sort && sort !== defaultSortSlug()) params.set('sort', sort)
+  const query = params.toString()
+  return query ? `${actionPath}?${query}` : actionPath
+}
+
+function FilterQueryInputs({ filters }: { filters: PlpFilters }) {
+  return (
+    <>
+      {filters.color.map((value) => (
+        <input key={`color-${value}`} name='color' type='hidden' value={value} />
+      ))}
+      {filters.era.map((value) => (
+        <input key={`era-${value}`} name='era' type='hidden' value={value} />
+      ))}
+      {filters.size.map((value) => (
+        <input key={`size-${value}`} name='size' type='hidden' value={value} />
+      ))}
+      {filters.type.map((value) => (
+        <input key={`type-${value}`} name='type' type='hidden' value={value} />
+      ))}
+    </>
+  )
 }
 
 interface FilterGroupProps {
