@@ -3,18 +3,19 @@
 import { ShopPayButton } from '@shopify/hydrogen/react'
 import clsx from 'clsx'
 
-import { useCart, useCartForm } from '@/lib/cart'
+import { useCart } from '@/lib/cart'
 import { openCartDrawer } from '@/lib/cart-drawer'
+import { ProductProvider, toAddToCartProduct, useProductForm } from '@/lib/product'
 import type { Product } from '@/lib/shopify/types'
 
 function SubmitButton({
   availableForSale,
-  selectedVariantId,
   register,
+  selectedVariantId,
 }: {
   availableForSale: boolean
+  register: ReturnType<typeof useProductForm>['register']
   selectedVariantId: string | undefined
-  register: ReturnType<typeof useCartForm>['register']
 }) {
   const buttonClasses =
     'relative flex w-full cursor-pointer items-center justify-center rounded-md bg-sandy-clay p-2 text-lg tracking-wide text-espresso border border-espresso uppercase'
@@ -40,21 +41,19 @@ function SubmitButton({
     <button
       aria-label='Add to cart'
       className={clsx(buttonClasses, 'hover:opacity-90')}
-      type='submit'
-      {...register('add')}
+      {...register('addToCart', {})}
     >
       Add To Cart
     </button>
   )
 }
 
-export function AddToCart({ product }: { product: Product }) {
-  const variant = product.variants[0]
-  const { formProps, register } = useCartForm()
+function AddToCartForm() {
+  const { formProps, register, selectedVariant } = useProductForm()
   const cartPending = useCart(
     (cartState) => cartState.pending.lines.size > 0 || cartState.pending.cost === true,
   )
-  const selectedVariantId = variant?.id
+  const selectedVariantId = selectedVariant?.id
 
   return (
     <div className='mx-auto flex w-full flex-col gap-3 lg:w-1/2'>
@@ -63,17 +62,16 @@ export function AddToCart({ product }: { product: Product }) {
           beforeSubmit: (event) => {
             if (!selectedVariantId) {
               event.preventDefault()
+              return
             }
-          },
-          afterSubmit: () => {
             openCartDrawer()
           },
         })}
       >
-        <input type='hidden' {...register('merchandiseId', { value: selectedVariantId ?? '' })} />
+        <input type='hidden' {...register('merchandiseId', {})} />
         <input type='hidden' {...register('quantity', { value: 1 })} />
         <SubmitButton
-          availableForSale={variant?.availableForSale ?? false}
+          availableForSale={selectedVariant?.availableForSale ?? false}
           register={register}
           selectedVariantId={selectedVariantId}
         />
@@ -81,11 +79,19 @@ export function AddToCart({ product }: { product: Product }) {
       {selectedVariantId ? (
         <ShopPayButton
           borderRadius='6px'
-          disabled={!variant.availableForSale || cartPending}
+          disabled={!selectedVariant?.availableForSale || cartPending}
           variants={[{ id: selectedVariantId, quantity: 1 }]}
           width='100%'
         />
       ) : null}
     </div>
+  )
+}
+
+export function AddToCart({ product }: { product: Product }) {
+  return (
+    <ProductProvider product={toAddToCartProduct(product)}>
+      <AddToCartForm />
+    </ProductProvider>
   )
 }
