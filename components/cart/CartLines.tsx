@@ -7,7 +7,6 @@ import { Suspense } from 'react'
 
 import { useCart, useCartForm, useSuspenseCart } from '@/lib/cart'
 import { closeCartDrawer } from '@/lib/cart-drawer'
-import { DEFAULT_OPTION } from '@/lib/constants'
 import { formatPrice } from '@/lib/money'
 import { resolveProductImage } from '@/lib/product-image'
 import {
@@ -15,7 +14,6 @@ import {
   reshapeSizes,
   type ShopifyCategoryMetafield,
 } from '@/lib/shopify/category-attributes'
-import { createUrl } from '@/lib/utils'
 
 type CartProductWithAttributes = NonNullable<CartLine['merchandise']>['product'] & {
   color?: ShopifyCategoryMetafield
@@ -66,7 +64,6 @@ function LineItem({ line }: { line: CartLine }) {
     : []
   const errorId = `cart-line-error-${line.id}`
   const merchandise = line.merchandise
-  const selectedOptions = merchandise?.selectedOptions ?? []
   const product = merchandise?.product as CartProductWithAttributes | undefined
   const title = product?.title ?? merchandise?.title ?? 'Product'
   const image = resolveProductImage(
@@ -83,21 +80,7 @@ function LineItem({ line }: { line: CartLine }) {
   )
   const colors = reshapeColors(product?.color)
   const sizes = reshapeSizes(product?.size)
-
-  const merchandiseSearchParams: Record<string, string> = {}
-  selectedOptions.forEach(({ name, value }) => {
-    if (value !== DEFAULT_OPTION) {
-      merchandiseSearchParams[name.toLowerCase()] = value
-    }
-  })
-
-  const merchandiseUrl = product?.handle
-    ? createUrl(`/product/${product.handle}`, new URLSearchParams(merchandiseSearchParams))
-    : null
-  const optionLabel = selectedOptions
-    .filter((option) => option.value !== DEFAULT_OPTION)
-    .map((option) => option.value)
-    .join(' / ')
+  const merchandiseUrl = product?.handle ? `/product/${product.handle}` : null
 
   return (
     <li className='flex w-full flex-col border-b border-neutral-300'>
@@ -124,9 +107,6 @@ function LineItem({ line }: { line: CartLine }) {
             ) : (
               <span className='leading-tight'>{title}</span>
             )}
-            {optionLabel ? (
-              <span className='text-espresso/70 mt-1 text-sm'>{optionLabel}</span>
-            ) : null}
             {colors.length > 0 || sizes.length > 0 ? (
               <div className='text-espresso/70 mt-1 flex flex-col text-sm'>
                 {colors.map((color) => (
@@ -197,11 +177,6 @@ function CartTotals() {
 
 function CartLinesBody({ variant }: { variant: 'drawer' | 'page' }) {
   const lines = useSuspenseCart((state) => state.data.lines.nodes)
-  const loading = useCart((state) => state.loading)
-
-  if (loading) {
-    return <p role='status'>Loading cart…</p>
-  }
 
   if (lines.length === 0) {
     return (
