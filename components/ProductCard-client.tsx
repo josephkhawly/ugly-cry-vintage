@@ -16,9 +16,7 @@ export function ProductCardQuickAdd({ size, variantId }: ProductCardQuickAddProp
       {size ? <span>Size {size}</span> : <span />}
       <form
         {...formProps({
-          afterSubmit: () => {
-            openCartDrawer()
-          },
+          beforeSubmit: openCartDrawer,
         })}
       >
         <input type='hidden' {...register('merchandiseId', { value: variantId })} />
