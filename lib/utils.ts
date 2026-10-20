@@ -1,4 +1,4 @@
-import { ReadonlyURLSearchParams } from 'next/navigation'
+import type { ReadonlyURLSearchParams } from 'next/navigation'
 import { Product } from './shopify/types'
 
 export const createUrl = (pathname: string, params: URLSearchParams | ReadonlyURLSearchParams) => {

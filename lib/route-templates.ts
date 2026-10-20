@@ -6,6 +6,4 @@ export const routeTemplates = createShopifyRouteTemplates({
   collection: '/shop/:collectionHandle',
   collectionList: '/shop',
   page: '/:pageHandle',
-  search: '/search',
-  cart: '/cart',
 })
