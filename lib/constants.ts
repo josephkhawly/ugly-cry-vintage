@@ -21,6 +21,7 @@ export const sorting: SortFilterItem[] = [
 
 export const TAGS = {
   collections: 'collections',
+  pages: 'pages',
   products: 'products',
 }
 

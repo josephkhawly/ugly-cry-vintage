@@ -9,6 +9,7 @@ import { Suspense } from 'react'
 import { AppShell } from './app-shell'
 import './globals.css'
 
+
 const roboto = Roboto({
   weight: ['400', '500', '700'],
   subsets: ['latin'],

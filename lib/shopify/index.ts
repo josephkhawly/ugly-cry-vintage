@@ -1,5 +1,5 @@
 import type { StorefrontClient } from '@shopify/hydrogen'
-import { revalidateTag } from 'next/cache'
+import { cacheLife, cacheTag, revalidateTag } from 'next/cache'
 import { headers } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -15,7 +15,7 @@ import {
   shopifyGidToId,
   toStorefrontQuery,
 } from '../plp-filters'
-import { getStorefrontClient } from '../storefront'
+import { staticStorefrontClient } from '../storefront-static'
 import { ensureStartsWith, sortProductsByAvailability } from '../utils'
 import { reshapeColors, reshapeSizes } from './category-attributes'
 import {
@@ -50,12 +50,17 @@ import {
 async function shopifyQuery<TDoc extends Parameters<StorefrontClient['graphql']>[0]>(
   document: TDoc,
   options?: {
-    variables?: Record<string, unknown>
     tags?: string[]
+    variables?: Record<string, unknown>
   },
 ) {
-  const storefront = await getStorefrontClient()
-  const { data, errors } = await storefront.graphql(document, {
+  'use cache'
+  cacheLife('hours')
+  for (const tag of options?.tags ?? []) {
+    cacheTag(tag)
+  }
+
+  const { data, errors } = await staticStorefrontClient.graphql(document, {
     variables: options?.variables,
   } as never)
 
@@ -250,10 +255,13 @@ export async function getPlpListing({
 
   const facetQuery = collectionId ? `collection_id:${collectionId}` : undefined
   const listingQuery = toStorefrontQuery(filters, collectionId) ?? facetQuery
+  const productTags = collectionHandle
+    ? [TAGS.collections, TAGS.products]
+    : [TAGS.products]
 
   const [facetProducts, products] = await Promise.all([
-    getProducts({ query: facetQuery }),
-    getProducts({ query: listingQuery, reverse, sortKey }),
+    getProducts({ query: facetQuery, tags: productTags }),
+    getProducts({ query: listingQuery, reverse, sortKey, tags: productTags }),
   ])
 
   return {
@@ -335,6 +343,7 @@ export async function getMenu(handle: string): Promise<Menu[]> {
 
 export async function getPage(handle: string): Promise<Page> {
   const data = await shopifyQuery(getPageQuery, {
+    tags: [TAGS.pages],
     variables: { handle },
   })
 
@@ -342,7 +351,9 @@ export async function getPage(handle: string): Promise<Page> {
 }
 
 export async function getPages(): Promise<Page[]> {
-  const data = await shopifyQuery(getPagesQuery)
+  const data = await shopifyQuery(getPagesQuery, {
+    tags: [TAGS.pages],
+  })
 
   return removeEdgesAndNodes(data!.pages as Connection<Page>)
 }
@@ -377,17 +388,19 @@ export async function getProducts({
   query,
   reverse,
   sortKey,
+  tags = [TAGS.products],
 }: {
   query?: string
   reverse?: boolean
   sortKey?: string
+  tags?: string[]
 }): Promise<Product[]> {
   const nodes: ShopifyProduct[] = []
   let after: string | undefined
 
   for (let page = 0; page < MAX_PRODUCT_PAGES; page++) {
     const data = await shopifyQuery(getProductsQuery, {
-      tags: [TAGS.products],
+      tags,
       variables: {
         after,
         query,
@@ -418,10 +431,12 @@ export async function revalidate(req: NextRequest): Promise<NextResponse> {
   // We always need to respond with a 200 status code to Shopify,
   // otherwise it will continue to retry the request.
   const collectionWebhooks = ['collections/create', 'collections/delete', 'collections/update']
+  const pageWebhooks = ['pages/create', 'pages/delete', 'pages/update']
   const productWebhooks = ['products/create', 'products/delete', 'products/update']
   const topic = (await headers()).get('x-shopify-topic') || 'unknown'
   const secret = req.nextUrl.searchParams.get('secret')
   const isCollectionUpdate = collectionWebhooks.includes(topic)
+  const isPageUpdate = pageWebhooks.includes(topic)
   const isProductUpdate = productWebhooks.includes(topic)
 
   if (!secret || secret !== process.env.SHOPIFY_REVALIDATION_SECRET) {
@@ -429,13 +444,17 @@ export async function revalidate(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ status: 200 })
   }
 
-  if (!isCollectionUpdate && !isProductUpdate) {
+  if (!isCollectionUpdate && !isPageUpdate && !isProductUpdate) {
     // We don't need to revalidate anything for any other topics.
     return NextResponse.json({ status: 200 })
   }
 
   if (isCollectionUpdate) {
     revalidateTag(TAGS.collections, 'max')
+  }
+
+  if (isPageUpdate) {
+    revalidateTag(TAGS.pages, 'max')
   }
 
   if (isProductUpdate) {

@@ -2,6 +2,9 @@ import { withBotId } from 'botid/next/config'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  cacheComponents: true,
+  // Adopt Partial Prefetching separately (next-partial-prefetching-adoption skill).
+  partialPrefetching: false,
   images: {
     qualities: [60, 75],
     minimumCacheTTL: 2678400, // 31 days
