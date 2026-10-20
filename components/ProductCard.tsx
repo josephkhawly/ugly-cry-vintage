@@ -12,7 +12,7 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <li>
       <div className='flex flex-col items-start'>
-        <div className='group relative mb-2 w-full overflow-hidden' style={{ aspectRatio: '3/4' }}>
+        <div className='group relative mb-2 aspect-3/4 w-full overflow-hidden'>
           <Link className='absolute inset-0' href={`/product/${handle}`}>
             <Image
               alt={title}
