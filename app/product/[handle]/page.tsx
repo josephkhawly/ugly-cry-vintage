@@ -5,6 +5,7 @@ import { ProductAccordions } from '@/components/ProductAccordions'
 import { ProductAttributes } from '@/components/ProductAttributes'
 import Prose from '@/components/Prose'
 import { HIDDEN_PRODUCT_TAG } from '@/lib/constants'
+import { resolveProductImage, resolveProductImages } from '@/lib/product-image'
 import { getProduct } from '@/lib/shopify'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -19,7 +20,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 
   if (!product) return notFound()
 
-  const { url, width, height, altText: alt } = product.featuredImage || {}
+  const image = resolveProductImage(product.featuredImage, product.images, product.title)
   const indexable = !product.tags.includes(HIDDEN_PRODUCT_TAG)
 
   return {
@@ -33,18 +34,16 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
         follow: indexable,
       },
     },
-    openGraph: url
-      ? {
-          images: [
-            {
-              url,
-              width,
-              height,
-              alt,
-            },
-          ],
-        }
-      : null,
+    openGraph: {
+      images: [
+        {
+          alt: image.altText,
+          height: image.height,
+          url: image.url,
+          width: image.width,
+        },
+      ],
+    },
   }
 }
 
@@ -54,7 +53,8 @@ export default async function ProductPage(props: PageProps) {
 
   if (!product) return notFound()
 
-  const { priceRange, featuredImage } = product
+  const { priceRange } = product
+  const featuredImage = resolveProductImage(product.featuredImage, product.images, product.title)
 
   const productJsonLd = {
     '@context': 'https://schema.org',
@@ -83,7 +83,7 @@ export default async function ProductPage(props: PageProps) {
       />
       <div className='container mx-auto grid grid-flow-row grid-cols-1 items-start gap-6 px-6 pt-16 pb-12 sm:pt-24 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:gap-8 lg:px-12'>
         <div className='w-full min-w-0'>
-          <ImageGallery images={product.images} />
+          <ImageGallery images={resolveProductImages(product.images, product.title)} />
         </div>
         <div className='font-subheading w-full min-w-0'>
           <h1 className='font-body mb-1 text-[1.75rem] tracking-wide lg:text-[2.125rem]'>

@@ -46,10 +46,11 @@ export type Page = {
 
 export type Product = Omit<
   ShopifyProduct,
-  'color' | 'images' | 'media' | 'metafields' | 'size' | 'variants'
+  'color' | 'featuredImage' | 'images' | 'media' | 'metafields' | 'size' | 'variants'
 > & {
   colors: ProductColor[]
   details: ProductDetail[]
+  featuredImage: Image
   images: Image[]
   sizes: string[]
   variants: ProductVariant[]
@@ -99,7 +100,7 @@ export type ShopifyCollection = {
 
 export type ShopifyMedia = {
   alt: string
-  image: Image
+  image?: Image | null
 }
 
 export type ShopifyProduct = {
@@ -119,7 +120,7 @@ export type ShopifyProduct = {
   productType: string
   size?: ShopifyCategoryMetafield
   variants: Connection<ProductVariant>
-  featuredImage: Image
+  featuredImage: Image | null
   images?: Connection<Image>
   media: Connection<ShopifyMedia>
   seo: SEO

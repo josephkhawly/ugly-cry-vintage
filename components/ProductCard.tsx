@@ -1,12 +1,16 @@
 import Image from 'next/image'
 import Link from 'next/link'
+
+import { resolveProductImage } from '@/lib/product-image'
+import { Product } from '@/lib/shopify/types'
+
 import Price from './Price'
 import { ProductCardQuickAdd } from './ProductCard-client'
-import { Product } from '@/lib/shopify/types'
 
 export default function ProductCard({ product }: { product: Product }) {
   const { availableForSale, featuredImage, handle, images, priceRange, title, variants } = product
-  const hoverImage = images.find((image) => image?.url && image.url !== featuredImage.url)
+  const image = resolveProductImage(featuredImage, images, title)
+  const hoverImage = images.find((candidate) => candidate?.url && candidate.url !== image.url)
   const variantId = variants[0]?.id
 
   return (
@@ -16,7 +20,7 @@ export default function ProductCard({ product }: { product: Product }) {
           <Link className='absolute inset-0' href={`/product/${handle}`}>
             <Image
               alt={title}
-              src={featuredImage.url}
+              src={image.url}
               fill
               sizes='(max-width: 768px) 100vw, 50vw'
               className='object-cover'

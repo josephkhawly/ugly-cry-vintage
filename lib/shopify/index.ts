@@ -15,6 +15,7 @@ import {
   shopifyGidToId,
   toStorefrontQuery,
 } from '../plp-filters'
+import { resolveProductImage, resolveProductImages } from '../product-image'
 import { getStorefrontClient } from '../storefront'
 import { ensureStartsWith, sortProductsByAvailability } from '../utils'
 import { reshapeColors, reshapeSizes } from './category-attributes'
@@ -116,12 +117,19 @@ const reshapeCollections = (collections: ShopifyCollection[]) => {
 const reshapeImages = (images: Connection<ShopifyMedia>, productTitle: string) => {
   const flattened = removeEdgesAndNodes(images)
 
-  return flattened.map((image) => {
-    const filename = image.image?.url.match(/.*\/(.*)\..*/)?.[1]
-    return {
-      ...image.image,
-      altText: image.image?.altText || `${productTitle} - ${filename}`,
+  return flattened.flatMap((media) => {
+    const image = media.image
+    if (!image?.url) {
+      return []
     }
+
+    const filename = image.url.match(/.*\/(.*)\..*/)?.[1]
+    return [
+      {
+        ...image,
+        altText: image.altText || `${productTitle} - ${filename}`,
+      },
+    ]
   })
 }
 
@@ -148,12 +156,14 @@ const reshapeProduct = (
   }
 
   const { color, media, metafields, size, variants, ...rest } = product
+  const images = resolveProductImages(reshapeImages(media, product.title), product.title)
 
   return {
     ...rest,
     colors: reshapeColors(color),
     details: reshapeProductDetails(metafields),
-    images: reshapeImages(media, product.title),
+    featuredImage: resolveProductImage(product.featuredImage, images, product.title),
+    images,
     sizes: reshapeSizes(size),
     variants: removeEdgesAndNodes(variants),
   }

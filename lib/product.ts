@@ -1,5 +1,6 @@
 import { createProductComponents } from '@shopify/hydrogen/react'
 
+import { resolveProductImage } from '@/lib/product-image'
 import type { Image, Product, ProductVariant } from '@/lib/shopify/types'
 
 export interface AddToCartProduct {
@@ -50,7 +51,7 @@ export function toAddToCartProduct(product: Product): AddToCartProduct {
   const selectedVariant: AddToCartProductVariant = {
     availableForSale: variant.availableForSale,
     id: variant.id,
-    image: product.featuredImage,
+    image: resolveProductImage(product.featuredImage, product.images, product.title),
     price: variant.price,
     product: {
       handle: product.handle,
