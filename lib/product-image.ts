@@ -2,9 +2,9 @@ import type { Image } from './shopify/types'
 
 export const PRODUCT_IMAGE_PLACEHOLDER: Image = {
   altText: 'Product image unavailable',
-  height: 800,
-  url: '/product-placeholder.svg',
-  width: 600,
+  height: 480,
+  url: '/product-placeholder.png',
+  width: 480,
 }
 
 export function resolveProductImage(
