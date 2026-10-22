@@ -1,3 +1,4 @@
+import { withSentryConfig } from '@sentry/nextjs/config'
 import { withBotId } from 'botid/next/config'
 
 /** @type {import('next').NextConfig} */
@@ -31,4 +32,22 @@ const nextConfig = {
   },
 }
 
-export default withBotId(nextConfig)
+const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN
+
+export default withSentryConfig(withBotId(nextConfig), {
+  authToken: sentryAuthToken,
+  bundleSizeOptimizations: {
+    excludeDebugStatements: true,
+    excludeTracing: true,
+  },
+  errorHandler(error) {
+    console.warn('[sentry] build step failed; continuing without source maps:', error.message)
+  },
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  silent: !process.env.CI,
+  sourcemaps: {
+    disable: !sentryAuthToken,
+  },
+})
+
