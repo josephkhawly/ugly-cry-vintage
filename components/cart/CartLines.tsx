@@ -9,6 +9,7 @@ import { useCart, useCartForm, useSuspenseCart } from '@/lib/cart'
 import { closeCartDrawer } from '@/lib/cart-drawer'
 import { DEFAULT_OPTION } from '@/lib/constants'
 import { formatPrice } from '@/lib/money'
+import { resolveProductImage } from '@/lib/product-image'
 import {
   reshapeColors,
   reshapeSizes,
@@ -67,7 +68,19 @@ function LineItem({ line }: { line: CartLine }) {
   const merchandise = line.merchandise
   const selectedOptions = merchandise?.selectedOptions ?? []
   const product = merchandise?.product as CartProductWithAttributes | undefined
-  const image = merchandise?.image
+  const title = product?.title ?? merchandise?.title ?? 'Product'
+  const image = resolveProductImage(
+    merchandise?.image?.url
+      ? {
+          altText: merchandise.image.altText ?? '',
+          height: merchandise.image.height ?? 800,
+          url: merchandise.image.url,
+          width: merchandise.image.width ?? 600,
+        }
+      : null,
+    [],
+    title,
+  )
   const colors = reshapeColors(product?.color)
   const sizes = reshapeSizes(product?.size)
 
@@ -81,8 +94,6 @@ function LineItem({ line }: { line: CartLine }) {
   const merchandiseUrl = product?.handle
     ? createUrl(`/product/${product.handle}`, new URLSearchParams(merchandiseSearchParams))
     : null
-
-  const title = product?.title ?? merchandise?.title ?? 'Product'
   const optionLabel = selectedOptions
     .filter((option) => option.value !== DEFAULT_OPTION)
     .map((option) => option.value)
@@ -92,17 +103,15 @@ function LineItem({ line }: { line: CartLine }) {
     <li className='flex w-full flex-col border-b border-neutral-300'>
       <div className='flex w-full flex-row justify-between gap-3 px-1 py-4'>
         <div className='flex min-w-0 flex-row'>
-          {image?.url ? (
-            <div className='relative h-24 w-24 shrink-0 overflow-hidden rounded-md border border-neutral-300 bg-neutral-300'>
-              <Image
-                alt={image.altText || title}
-                className='h-full w-full object-cover'
-                height={96}
-                src={image.url}
-                width={96}
-              />
-            </div>
-          ) : null}
+          <div className='relative h-24 w-24 shrink-0 overflow-hidden rounded-md border border-neutral-300 bg-neutral-300'>
+            <Image
+              alt={image.altText || title}
+              className='h-full w-full object-cover'
+              height={96}
+              src={image.url}
+              width={96}
+            />
+          </div>
           <div className='ml-2 flex min-w-0 flex-1 flex-col text-base'>
             {merchandiseUrl ? (
               <Link

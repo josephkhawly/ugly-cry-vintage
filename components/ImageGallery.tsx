@@ -4,6 +4,8 @@ import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/re
 import Image from 'next/image'
 import { Fragment, useEffect, useRef, useState, type MouseEvent } from 'react'
 import { HiChevronDown, HiChevronUp, HiOutlineXMark } from 'react-icons/hi2'
+
+import { resolveProductImages } from '@/lib/product-image'
 import type { Image as ImageType } from '@/lib/shopify/types'
 
 interface ImageGalleryProps {
@@ -29,17 +31,16 @@ const ZOOM_SCALE = 2.5
 export function ImageGallery({ images }: ImageGalleryProps) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
+  const galleryImages = resolveProductImages(images)
 
-  if (images.length === 0) return null
-
-  const selectedImage = images[selectedIndex]
+  const selectedImage = galleryImages[selectedIndex]
 
   return (
     <div className='w-full min-w-0'>
       <div className='flex gap-3 md:gap-4'>
-        {images.length > 1 ? (
+        {galleryImages.length > 1 ? (
           <ThumbnailStrip
-            images={images}
+            images={galleryImages}
             onSelect={setSelectedIndex}
             selectedIndex={selectedIndex}
           />
@@ -63,7 +64,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
       </div>
 
       <ImageLightbox
-        images={images}
+        images={galleryImages}
         isOpen={isLightboxOpen}
         onClose={() => setIsLightboxOpen(false)}
         onSelect={setSelectedIndex}
