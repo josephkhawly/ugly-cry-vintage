@@ -89,6 +89,14 @@ export type SEO = {
   description: string
 }
 
+export type ShopPolicy = {
+  body: string
+  handle: string
+  id?: string | null
+  title: string
+  url: string
+}
+
 export type ShopifyCollection = {
   description: string
   handle: string
