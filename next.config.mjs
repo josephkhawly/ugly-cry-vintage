@@ -49,5 +49,6 @@ export default withSentryConfig(withBotId(nextConfig), {
   sourcemaps: {
     disable: !sentryAuthToken,
   },
+  tunnelRoute: '/monitoring',
 })
 
