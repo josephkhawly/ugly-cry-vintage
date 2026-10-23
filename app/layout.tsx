@@ -4,7 +4,6 @@ import type { Metadata } from 'next'
 import { Roboto } from 'next/font/google'
 import localFont from 'next/font/local'
 import Script from 'next/script'
-import { Suspense } from 'react'
 
 import { AppShell } from './app-shell'
 import './globals.css'
@@ -42,9 +41,7 @@ export default function RootLayout({
           strategy='afterInteractive'
           type='module'
         />
-        <Suspense fallback={null}>
-          <AppShell>{children}</AppShell>
-        </Suspense>
+        <AppShell>{children}</AppShell>
         <SpeedInsights />
         <Analytics />
       </body>

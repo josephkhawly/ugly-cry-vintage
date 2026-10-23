@@ -30,6 +30,7 @@ import {
 } from './queries/collection'
 import { getMenuQuery } from './queries/menu'
 import { getPageQuery, getPagesQuery } from './queries/page'
+import { getShopPoliciesQuery } from './queries/policy'
 import {
   getProductQuery,
   getProductRecommendationsQuery,
@@ -46,6 +47,7 @@ import {
   ShopifyMedia,
   ShopifyMetafield,
   ShopifyProduct,
+  ShopPolicy,
 } from './types'
 
 async function shopifyQuery<TDoc extends Parameters<StorefrontClient['graphql']>[0]>(
@@ -355,6 +357,40 @@ export async function getPages(): Promise<Page[]> {
   const data = await shopifyQuery(getPagesQuery)
 
   return removeEdgesAndNodes(data!.pages as Connection<Page>)
+}
+
+export async function getShopPolicies(): Promise<ShopPolicy[]> {
+  const data = await shopifyQuery(getShopPoliciesQuery)
+  const shop = data?.shop
+  const candidates = [
+    shop?.contactInformation,
+    shop?.legalNotice,
+    shop?.privacyPolicy,
+    shop?.refundPolicy,
+    shop?.shippingPolicy,
+    shop?.subscriptionPolicy,
+    shop?.termsOfSale,
+    shop?.termsOfService,
+  ]
+
+  return candidates.flatMap((policy) =>
+    policy?.handle && policy.body.trim()
+      ? [
+          {
+            body: policy.body,
+            handle: policy.handle,
+            id: policy.id,
+            title: policy.title,
+            url: policy.url,
+          },
+        ]
+      : [],
+  )
+}
+
+export async function getShopPolicy(handle: string): Promise<ShopPolicy | undefined> {
+  const policies = await getShopPolicies()
+  return policies.find((policy) => policy.handle === handle)
 }
 
 export async function getProduct(handle: string): Promise<Product | undefined> {
