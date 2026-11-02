@@ -157,7 +157,7 @@ function LineItem({ line }: { line: CartLine }) {
             Remove
           </button>
           {errorMessages.length > 0 ? (
-            <p className='text-burnt-orange max-w-40 text-right text-xs' id={errorId} role='alert'>
+            <p className='text-red-500 max-w-40 text-right text-xs' id={errorId} role='alert'>
               {errorMessages.join(' ')}
             </p>
           ) : null}

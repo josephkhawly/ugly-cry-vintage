@@ -5,8 +5,8 @@ export default function Home() {
   return (
     <>
       <Hero
-        backgroundImage='/hats.gif'
-        backgroundImageAlt='Vintage hats'
+        backgroundImage='/drop2.png'
+        backgroundImageAlt='Vintage sweaters'
         href='/shop/new-arrivals'
         objectFit='contain'
         overlayOpacity={0}

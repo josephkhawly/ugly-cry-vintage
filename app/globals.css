@@ -2,7 +2,6 @@
 @plugin '@tailwindcss/typography';
 
 @theme {
-  --color-burnt-orange: #d74712;
   --color-espresso: #301b05;
   --color-teal: #809fa0;
   --color-silver: #c1c7c7;
