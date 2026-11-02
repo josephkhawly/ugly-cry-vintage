@@ -13,6 +13,7 @@ export type PlpFilters = {
 }
 
 export type PlpColorFacet = {
+  aliases: string[]
   hex: string | null
   label: string
 }
@@ -78,8 +79,18 @@ export function getFilterFacets(products: Product[]): PlpFacets {
       const hex = color.baseColors.length > 1 ? null : color.hex
       for (const label of colorFilterLabels(color)) {
         const existing = colors.get(label)
-        if (!existing) colors.set(label, { hex, label })
-        else if (!existing.hex && hex) colors.set(label, { hex, label })
+        if (!existing) {
+          colors.set(label, {
+            aliases: color.label === label ? [] : [color.label],
+            hex,
+            label,
+          })
+        } else {
+          if (!existing.hex && hex) existing.hex = hex
+          if (color.label !== label && !existing.aliases.includes(color.label)) {
+            existing.aliases.push(color.label)
+          }
+        }
       }
     }
     for (const size of product.sizes) sizes.add(size)
@@ -88,7 +99,12 @@ export function getFilterFacets(products: Product[]): PlpFacets {
   }
 
   return {
-    colors: [...colors.values()].sort((a, b) => a.label.localeCompare(b.label)),
+    colors: [...colors.values()]
+      .map((color) => ({
+        ...color,
+        aliases: [...color.aliases].sort((a, b) => a.localeCompare(b)),
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label)),
     eras: ERA_ORDER.filter((era) => eras.has(era)),
     sizes: [...sizes].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })),
     types: [...types].sort((a, b) => a.localeCompare(b)),
@@ -107,8 +123,10 @@ export function filterProductsBySizeColor(products: Product[], filters: PlpFilte
     }
     if (
       filters.color.length > 0 &&
-      !filters.color.some((color) =>
-        product.colors.some((entry) => colorFilterLabels(entry).includes(color)),
+      !filters.color.some((selected) =>
+        product.colors.some(
+          (entry) => entry.label === selected || colorFilterLabels(entry).includes(selected),
+        ),
       )
     ) {
       return false
