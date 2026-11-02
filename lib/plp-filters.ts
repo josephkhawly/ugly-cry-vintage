@@ -75,7 +75,7 @@ export function getFilterFacets(products: Product[]): PlpFacets {
 
   for (const product of products) {
     for (const color of product.colors) {
-      // Multi-base swatches share one hex; omit it so a Blue facet never keeps a red chip.
+      // Multi-base colors share one hex; omit it so sibling facets are not painted wrong.
       const hex = color.baseColors.length > 1 ? null : color.hex
       for (const label of colorFilterLabels(color)) {
         const existing = colors.get(label)
@@ -85,11 +85,11 @@ export function getFilterFacets(products: Product[]): PlpFacets {
             hex,
             label,
           })
-        } else {
-          if (!existing.hex && hex) existing.hex = hex
-          if (color.label !== label && !existing.aliases.includes(color.label)) {
-            existing.aliases.push(color.label)
-          }
+          continue
+        }
+        if (!existing.hex && hex) existing.hex = hex
+        if (color.label !== label && !existing.aliases.includes(color.label)) {
+          existing.aliases.push(color.label)
         }
       }
     }
@@ -98,13 +98,12 @@ export function getFilterFacets(products: Product[]): PlpFacets {
     for (const era of productEras(product)) eras.add(era)
   }
 
+  for (const facet of colors.values()) {
+    facet.aliases.sort((a, b) => a.localeCompare(b))
+  }
+
   return {
-    colors: [...colors.values()]
-      .map((color) => ({
-        ...color,
-        aliases: [...color.aliases].sort((a, b) => a.localeCompare(b)),
-      }))
-      .sort((a, b) => a.label.localeCompare(b.label)),
+    colors: [...colors.values()].sort((a, b) => a.label.localeCompare(b.label)),
     eras: ERA_ORDER.filter((era) => eras.has(era)),
     sizes: [...sizes].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })),
     types: [...types].sort((a, b) => a.localeCompare(b)),

@@ -17,7 +17,6 @@ export type ShopifyCategoryMetafield = {
   } | null
 } | null
 
-/** Shopify Standard Product Taxonomy color values used as color-pattern "Base color". */
 const COLOR_TAXONOMY_NAMES: Record<string, string> = {
   '1': 'Black',
   '2': 'Blue',
@@ -40,7 +39,7 @@ const COLOR_TAXONOMY_NAMES: Record<string, string> = {
   '2865': 'Multicolor',
 }
 
-const TAXONOMY_VALUE_ID = /gid:\/\/shopify\/TaxonomyValue\/(\d+)/
+const TAXONOMY_VALUE_ID = /gid:\/\/shopify\/TaxonomyValue\/(\d+)/g
 
 export const categoryAttributesFragment = gql(`
   fragment categoryAttributes on Product {
@@ -81,32 +80,14 @@ function metaobjectFields(metafield?: ShopifyCategoryMetafield) {
   )
 }
 
-function taxonomyValueIds(raw: string | undefined): string[] {
-  if (!raw?.trim()) return []
+function baseColorNames(taxonomyReference: string | undefined): string[] {
+  if (!taxonomyReference) return []
 
-  try {
-    const parsed: unknown = JSON.parse(raw)
-    if (Array.isArray(parsed)) {
-      return parsed.flatMap((entry) =>
-        typeof entry === 'string' ? taxonomyValueIds(entry) : [],
-      )
-    }
-  } catch {
-    // Single taxonomy GID strings are also valid.
-  }
-
-  const match = raw.match(TAXONOMY_VALUE_ID)
-  return match ? [match[1]] : []
-}
-
-export function baseColorNames(taxonomyReference: string | undefined): string[] {
   const names = new Set<string>()
-
-  for (const id of taxonomyValueIds(taxonomyReference)) {
-    const name = COLOR_TAXONOMY_NAMES[id]
+  for (const match of taxonomyReference.matchAll(TAXONOMY_VALUE_ID)) {
+    const name = COLOR_TAXONOMY_NAMES[match[1]]
     if (name) names.add(name)
   }
-
   return [...names]
 }
 
