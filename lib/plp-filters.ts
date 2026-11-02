@@ -74,10 +74,12 @@ export function getFilterFacets(products: Product[]): PlpFacets {
 
   for (const product of products) {
     for (const color of product.colors) {
+      // Multi-base swatches share one hex; omit it so a Blue facet never keeps a red chip.
+      const hex = color.baseColors.length > 1 ? null : color.hex
       for (const label of colorFilterLabels(color)) {
         const existing = colors.get(label)
-        if (!existing) colors.set(label, { hex: color.hex, label })
-        else if (!existing.hex && color.hex) colors.set(label, { hex: color.hex, label })
+        if (!existing) colors.set(label, { hex, label })
+        else if (!existing.hex && hex) colors.set(label, { hex, label })
       }
     }
     for (const size of product.sizes) sizes.add(size)
