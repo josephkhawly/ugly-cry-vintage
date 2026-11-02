@@ -202,7 +202,10 @@ function ColorFilterGroup({ options, selected }: ColorFilterGroupProps) {
         {options.map((color) => (
           <li key={color.label}>
             <FilterPill
-              defaultChecked={selected.includes(color.label)}
+              defaultChecked={
+                selected.includes(color.label) ||
+                color.aliases.some((alias) => selected.includes(alias))
+              }
               hex={color.hex}
               label={color.label}
               name='color'

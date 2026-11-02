@@ -12,8 +12,14 @@ export type PlpFilters = {
   type: string[]
 }
 
+export type PlpColorFacet = {
+  aliases: string[]
+  hex: string | null
+  label: string
+}
+
 export type PlpFacets = {
-  colors: ProductColor[]
+  colors: PlpColorFacet[]
   eras: Era[]
   sizes: string[]
   types: string[]
@@ -57,21 +63,43 @@ export function productEras(product: Product): Era[] {
   return ERA_ORDER.filter((era) => found.has(era))
 }
 
+function colorFilterLabels(color: ProductColor): string[] {
+  return color.baseColors.length > 0 ? color.baseColors : [color.label]
+}
+
 export function getFilterFacets(products: Product[]): PlpFacets {
-  const colors = new Map<string, ProductColor>()
+  const colors = new Map<string, PlpColorFacet>()
   const eras = new Set<Era>()
   const sizes = new Set<string>()
   const types = new Set<string>()
 
   for (const product of products) {
     for (const color of product.colors) {
-      const existing = colors.get(color.label)
-      if (!existing) colors.set(color.label, color)
-      else if (!existing.hex && color.hex) colors.set(color.label, color)
+      // Multi-base colors share one hex; omit it so sibling facets are not painted wrong.
+      const hex = color.baseColors.length > 1 ? null : color.hex
+      for (const label of colorFilterLabels(color)) {
+        const existing = colors.get(label)
+        if (!existing) {
+          colors.set(label, {
+            aliases: color.label === label ? [] : [color.label],
+            hex,
+            label,
+          })
+          continue
+        }
+        if (!existing.hex && hex) existing.hex = hex
+        if (color.label !== label && !existing.aliases.includes(color.label)) {
+          existing.aliases.push(color.label)
+        }
+      }
     }
     for (const size of product.sizes) sizes.add(size)
     if (product.productType) types.add(product.productType)
     for (const era of productEras(product)) eras.add(era)
+  }
+
+  for (const facet of colors.values()) {
+    facet.aliases.sort((a, b) => a.localeCompare(b))
   }
 
   return {
@@ -94,7 +122,11 @@ export function filterProductsBySizeColor(products: Product[], filters: PlpFilte
     }
     if (
       filters.color.length > 0 &&
-      !filters.color.some((color) => product.colors.some((entry) => entry.label === color))
+      !filters.color.some((selected) =>
+        product.colors.some(
+          (entry) => entry.label === selected || colorFilterLabels(entry).includes(selected),
+        ),
+      )
     ) {
       return false
     }
