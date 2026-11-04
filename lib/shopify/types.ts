@@ -46,7 +46,7 @@ export type Page = {
 
 export type Product = Omit<
   ShopifyProduct,
-  'color' | 'featuredImage' | 'images' | 'media' | 'metafields' | 'size' | 'variants'
+  'color' | 'featuredImage' | 'media' | 'metafields' | 'size' | 'variants'
 > & {
   colors: ProductColor[]
   details: ProductDetail[]
@@ -65,12 +65,6 @@ export type ProductDetail = {
 export type ShopifyMetafield = {
   key: string
   value: string
-}
-
-export type ProductOption = {
-  id: string
-  name: string
-  values: string[]
 }
 
 export type ProductVariant = {
@@ -120,7 +114,6 @@ export type ShopifyProduct = {
   descriptionHtml: string
   color?: ShopifyCategoryMetafield
   metafields?: (ShopifyMetafield | null)[]
-  options?: ProductOption[]
   priceRange: {
     maxVariantPrice: Money
     minVariantPrice: Money
@@ -129,7 +122,6 @@ export type ShopifyProduct = {
   size?: ShopifyCategoryMetafield
   variants: Connection<ProductVariant>
   featuredImage: Image | null
-  images?: Connection<Image>
   media: Connection<ShopifyMedia>
   seo: SEO
   tags: string[]
