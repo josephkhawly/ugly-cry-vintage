@@ -4,10 +4,10 @@ import type { Metadata } from 'next'
 import { Roboto } from 'next/font/google'
 import localFont from 'next/font/local'
 import Script from 'next/script'
+import { Suspense } from 'react'
 
 import { AppShell } from './app-shell'
 import './globals.css'
-
 
 const roboto = Roboto({
   weight: ['400', '500', '700'],
@@ -42,7 +42,9 @@ export default function RootLayout({
           strategy='afterInteractive'
           type='module'
         />
-        <AppShell>{children}</AppShell>
+        <Suspense fallback={null}>
+          <AppShell>{children}</AppShell>
+        </Suspense>
         <SpeedInsights />
         <Analytics />
       </body>

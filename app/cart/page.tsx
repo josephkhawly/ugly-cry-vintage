@@ -3,7 +3,6 @@ import Link from 'next/link'
 
 import { CartContent } from '@/components/cart/CartLines'
 
-
 export const metadata: Metadata = {
   title: 'Cart | Ugly Cry Vintage',
   description: 'Your shopping cart',

@@ -3,7 +3,6 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 import { PageContainer } from '@/components/PageContainer'
 
-
 export const metadata: Metadata = {
   title: 'Press | Ugly Cry Vintage',
   description: '',

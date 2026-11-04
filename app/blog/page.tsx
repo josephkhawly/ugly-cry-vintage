@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import { extractPreview, fetchSubstackPosts } from '@/lib/substack'
 
-
 function ReadMoreLink({ href }: { href: string }) {
   return (
     <a
