@@ -39,97 +39,98 @@ export function ProductListingToolbar({
   }
 
   return (
-    <div className='mb-8 flex items-center justify-between gap-4 px-2'>
-      <button
-        aria-controls={FILTER_DRAWER_ID}
-        aria-haspopup='dialog'
-        className='font-subheading cursor-pointer text-sm tracking-wide uppercase underline underline-offset-4'
-        onClick={openDrawer}
-        type='button'
-      >
-        {active ? 'Filters' : 'Filter'}
-      </button>
+    <>
+      <div className='mb-8 flex items-center justify-between gap-4 px-2'>
+        <button
+          aria-controls={FILTER_DRAWER_ID}
+          aria-haspopup='dialog'
+          className='font-subheading cursor-pointer text-sm tracking-wide uppercase underline underline-offset-4'
+          onClick={openDrawer}
+          type='button'
+        >
+          {active ? 'Filters' : 'Filter'}
+        </button>
 
-      <form action={actionPath} method='get'>
-        <FilterQueryInputs filters={filters} />
-        <label className='font-subheading flex items-center gap-2 text-sm tracking-wide uppercase'>
-          <span className='sr-only'>Sort</span>
-          <select
-            className='cursor-pointer border border-black bg-transparent px-3 py-2'
-            defaultValue={sort ?? defaultSortSlug()}
-            key={sort ?? defaultSortSlug()}
-            name='sort'
-            onChange={submitSort}
-          >
-            {sorting.map((item) => (
-              <option key={item.slug ?? 'default'} value={item.slug ?? ''}>
-                {item.title}
-              </option>
-            ))}
-          </select>
-          <noscript>
-            <button className='cursor-pointer underline underline-offset-4' type='submit'>
-              Sort
+        <form action={actionPath} method='get'>
+          <FilterQueryInputs filters={filters} />
+          <label className='font-subheading flex items-center gap-2 text-sm tracking-wide uppercase'>
+            <span className='sr-only'>Sort</span>
+            <select
+              className='cursor-pointer border border-black bg-transparent px-3 py-2'
+              defaultValue={sort ?? defaultSortSlug()}
+              key={sort ?? defaultSortSlug()}
+              name='sort'
+              onChange={submitSort}
+            >
+              {sorting.map((item) => (
+                <option key={item.slug ?? 'default'} value={item.slug ?? ''}>
+                  {item.title}
+                </option>
+              ))}
+            </select>
+            <noscript>
+              <button className='cursor-pointer underline underline-offset-4' type='submit'>
+                Sort
+              </button>
+            </noscript>
+          </label>
+        </form>
+
+        <dialog
+          aria-labelledby='filter-drawer-title'
+          className='filter-drawer bg-teal/50 flex-col border-r border-black text-black backdrop-blur-sm open:flex'
+          closedby='any'
+          id={FILTER_DRAWER_ID}
+          ref={dialogRef}
+        >
+          <div className='flex shrink-0 items-center justify-between gap-4 p-6 pb-2'>
+            <h2 className='font-subheading text-xl tracking-wide uppercase' id='filter-drawer-title'>
+              Filter
+            </h2>
+            <button
+              aria-label='Close filter'
+              className='cursor-pointer p-2 text-black'
+              onClick={closeDrawer}
+              type='button'
+            >
+              <HiOutlineXMark className='size-8' />
             </button>
-          </noscript>
-        </label>
-      </form>
+          </div>
 
-      <dialog
-        aria-labelledby='filter-drawer-title'
-        className='filter-drawer bg-teal/50 flex-col border-r border-black text-black backdrop-blur-sm open:flex'
-        closedby='any'
-        id={FILTER_DRAWER_ID}
-        ref={dialogRef}
-      >
-        <div className='flex shrink-0 items-center justify-between gap-4 p-6 pb-2'>
-          <h2 className='font-subheading text-xl tracking-wide uppercase' id='filter-drawer-title'>
-            Filter
-          </h2>
-          <button
-            aria-label='Close filter'
-            className='cursor-pointer p-2 text-black'
-            onClick={closeDrawer}
-            type='button'
+          <form
+            action={actionPath}
+            className='flex min-h-0 flex-1 flex-col overflow-hidden'
+            method='get'
+            onSubmit={closeDrawer}
           >
-            <HiOutlineXMark className='size-8' />
-          </button>
-        </div>
+            {sort && sort !== defaultSortSlug() ? (
+              <input name='sort' type='hidden' value={sort} />
+            ) : null}
+            <div className='flex min-h-0 flex-1 flex-col gap-8 overflow-y-auto px-6 pb-4'>
+              <FilterFacetFields facets={facets} filters={filters} />
+            </div>
+            <FilterFormActions actionPath={actionPath} onClear={closeDrawer} sort={sort} />
+          </form>
+        </dialog>
+      </div>
 
+      <noscript>
         <form
           action={actionPath}
-          className='flex min-h-0 flex-1 flex-col overflow-hidden'
+          className='bg-teal/50 mb-8 flex flex-col border border-black text-black'
           method='get'
-          onSubmit={closeDrawer}
         >
+          <h2 className='font-subheading px-6 pt-6 text-xl tracking-wide uppercase'>Filter</h2>
           {sort && sort !== defaultSortSlug() ? (
             <input name='sort' type='hidden' value={sort} />
           ) : null}
-          <div className='flex min-h-0 flex-1 flex-col gap-8 overflow-y-auto px-6 pb-4'>
-            <FilterGroup name='size' options={facets.sizes} selected={filters.size} title='Size' />
-            <ColorFilterGroup options={facets.colors} selected={filters.color} />
-            <FilterGroup name='type' options={facets.types} selected={filters.type} title='Type' />
-            <FilterGroup name='era' options={facets.eras} selected={filters.era} title='Era' />
+          <div className='flex flex-col gap-8 px-6 pt-6 pb-4'>
+            <FilterFacetFields facets={facets} filters={filters} />
           </div>
-
-          <div className='flex shrink-0 gap-3 border-t border-black/20 p-6'>
-            <Link
-              className='font-subheading flex-1 cursor-pointer rounded-full border border-black px-4 py-3 text-center text-sm tracking-wide uppercase'
-              href={clearFiltersHref(actionPath, sort)}
-              onClick={closeDrawer}
-            >
-              Clear
-            </Link>
-            <button
-              className='font-subheading flex-1 cursor-pointer rounded-full border border-black bg-black px-4 py-3 text-sm tracking-wide text-white uppercase'
-              type='submit'
-            >
-              Apply
-            </button>
-          </div>
+          <FilterFormActions actionPath={actionPath} sort={sort} />
         </form>
-      </dialog>
-    </div>
+      </noscript>
+    </>
   )
 }
 
@@ -142,6 +143,45 @@ function clearFiltersHref(actionPath: string, sort: string | null) {
   if (sort && sort !== defaultSortSlug()) params.set('sort', sort)
   const query = params.toString()
   return query ? `${actionPath}?${query}` : actionPath
+}
+
+function FilterFacetFields({ facets, filters }: { facets: PlpFacets; filters: PlpFilters }) {
+  return (
+    <>
+      <FilterGroup name='size' options={facets.sizes} selected={filters.size} title='Size' />
+      <ColorFilterGroup options={facets.colors} selected={filters.color} />
+      <FilterGroup name='type' options={facets.types} selected={filters.type} title='Type' />
+      <FilterGroup name='era' options={facets.eras} selected={filters.era} title='Era' />
+    </>
+  )
+}
+
+function FilterFormActions({
+  actionPath,
+  onClear,
+  sort,
+}: {
+  actionPath: string
+  onClear?: () => void
+  sort: string | null
+}) {
+  return (
+    <div className='flex shrink-0 gap-3 border-t border-black/20 p-6'>
+      <Link
+        className='font-subheading flex-1 cursor-pointer rounded-full border border-black px-4 py-3 text-center text-sm tracking-wide uppercase'
+        href={clearFiltersHref(actionPath, sort)}
+        onClick={onClear}
+      >
+        Clear
+      </Link>
+      <button
+        className='font-subheading flex-1 cursor-pointer rounded-full border border-black bg-black px-4 py-3 text-sm tracking-wide text-white uppercase'
+        type='submit'
+      >
+        Apply
+      </button>
+    </div>
+  )
 }
 
 function FilterQueryInputs({ filters }: { filters: PlpFilters }) {
