@@ -23,19 +23,11 @@ import {
   PRODUCT_DETAIL_METAFIELD_IDENTIFIERS,
   PRODUCT_DETAIL_METAFIELDS,
 } from './product-metafields'
-import {
-  getCollectionProductsQuery,
-  getCollectionQuery,
-  getCollectionsQuery,
-} from './queries/collection'
+import { getCollectionProductsQuery, getCollectionQuery } from './queries/collection'
 import { getMenuQuery } from './queries/menu'
-import { getPageQuery, getPagesQuery } from './queries/page'
+import { getPageQuery } from './queries/page'
 import { getShopPoliciesQuery } from './queries/policy'
-import {
-  getProductQuery,
-  getProductRecommendationsQuery,
-  getProductsQuery,
-} from './queries/product'
+import { getProductQuery, getProductsQuery } from './queries/product'
 import {
   Collection,
   Connection,
@@ -86,10 +78,6 @@ function asShopifyCollection(collection: unknown): ShopifyCollection | undefined
   return collection as ShopifyCollection | undefined
 }
 
-function asShopifyCollections(collections: unknown): ShopifyCollection[] {
-  return collections as ShopifyCollection[]
-}
-
 const removeEdgesAndNodes = <T>(array: Connection<T>): T[] => {
   return array?.edges?.map((edge) => edge?.node)
 }
@@ -103,22 +91,6 @@ const reshapeCollection = (collection: ShopifyCollection): Collection | undefine
     ...collection,
     path: `/shop/${collection.handle}`,
   }
-}
-
-const reshapeCollections = (collections: ShopifyCollection[]) => {
-  const reshapedCollections = []
-
-  for (const collection of collections) {
-    if (collection) {
-      const reshapedCollection = reshapeCollection(collection)
-
-      if (reshapedCollection) {
-        reshapedCollections.push(reshapedCollection)
-      }
-    }
-  }
-
-  return reshapedCollections
 }
 
 const reshapeImages = (images: Connection<ShopifyMedia>, productTitle: string) => {
@@ -189,7 +161,6 @@ const reshapeProducts = (products: ShopifyProduct[]) => {
     }
   }
 
-  // Sort products so that sold-out ones appear last
   return sortProductsByAvailability(reshapedProducts)
 }
 
@@ -283,37 +254,6 @@ export async function getPlpListing({
   }
 }
 
-export async function getCollections(): Promise<Collection[]> {
-  const data = await shopifyQuery(getCollectionsQuery, {
-    tags: [TAGS.collections],
-  })
-  const shopifyCollections = asShopifyCollections(
-    removeEdgesAndNodes(data?.collections as Connection<unknown>),
-  )
-  const collections = [
-    {
-      description: 'All products',
-      handle: '',
-      id: '',
-      path: '/shop',
-      seo: {
-        description: 'All products',
-        title: 'All',
-      },
-      title: 'All',
-      updatedAt: new Date().toISOString(),
-    },
-    // Filter out the `hidden` collections.
-    // Collections that start with `hidden-*` need to be hidden on the search page.
-    ...reshapeCollections(shopifyCollections).filter(
-      (collection) =>
-        !collection.handle.startsWith('hidden') && !collection.handle.startsWith('frontpage'),
-    ),
-  ]
-
-  return collections
-}
-
 function toMenuPath(url: string | null | undefined, type: string, storeDomain: string): string {
   if (!url) return '/'
 
@@ -362,14 +302,6 @@ export async function getPage(handle: string): Promise<Page> {
   return data!.page as Page
 }
 
-export async function getPages(): Promise<Page[]> {
-  const data = await shopifyQuery(getPagesQuery, {
-    tags: [TAGS.pages],
-  })
-
-  return removeEdgesAndNodes(data!.pages as Connection<Page>)
-}
-
 export async function getShopPolicies(): Promise<ShopPolicy[]> {
   const data = await shopifyQuery(getShopPoliciesQuery)
   const shop = data?.shop
@@ -414,17 +346,6 @@ export async function getProduct(handle: string): Promise<Product | undefined> {
   })
 
   return reshapeProduct(asShopifyProduct(data?.product), false)
-}
-
-export async function getProductRecommendations(productId: string): Promise<Product[]> {
-  const data = await shopifyQuery(getProductRecommendationsQuery, {
-    tags: [TAGS.products],
-    variables: {
-      productId,
-    },
-  })
-
-  return reshapeProducts(asShopifyProducts(data?.productRecommendations ?? []))
 }
 
 const PRODUCTS_PAGE_SIZE = 250
@@ -472,7 +393,7 @@ export async function getProducts({
   return reshapeProducts(nodes)
 }
 
-// This is called from `app/api/revalidate.ts` so providers can control revalidation logic.
+// This is called from `app/api/revalidate/route.ts` so providers can control revalidation logic.
 export async function revalidate(req: NextRequest): Promise<NextResponse> {
   // We always need to respond with a 200 status code to Shopify,
   // otherwise it will continue to retry the request.
@@ -491,7 +412,6 @@ export async function revalidate(req: NextRequest): Promise<NextResponse> {
   }
 
   if (!isCollectionUpdate && !isPageUpdate && !isProductUpdate) {
-    // We don't need to revalidate anything for any other topics.
     return NextResponse.json({ status: 200 })
   }
 
