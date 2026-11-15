@@ -7,10 +7,10 @@ import './globals.css'
 
 interface GlobalErrorProps {
   error: Error & { digest?: string }
-  unstable_retry: () => void
+  retry: () => void
 }
 
-export default function GlobalError({ error, unstable_retry }: GlobalErrorProps) {
+export default function GlobalError({ error, retry }: GlobalErrorProps) {
   useEffect(() => {
     Sentry.captureException(error)
   }, [error])
@@ -26,7 +26,7 @@ export default function GlobalError({ error, unstable_retry }: GlobalErrorProps)
           <p className='font-subheading text-espresso/80 mt-4 text-lg'>Please try again.</p>
           <button
             className='border-espresso bg-teal/50 font-subheading text-espresso mt-8 inline-flex cursor-pointer rounded-full border px-8 py-3 text-sm tracking-wide uppercase hover:opacity-90'
-            onClick={() => unstable_retry()}
+            onClick={() => retry()}
             type='button'
           >
             Try again
