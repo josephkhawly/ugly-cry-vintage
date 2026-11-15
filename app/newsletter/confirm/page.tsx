@@ -1,9 +1,6 @@
 import { Suspense } from 'react'
 
-import {
-  ConfirmMessage,
-  NewsletterConfirmForm,
-} from '@/components/NewsletterConfirmForm'
+import { ConfirmMessage, NewsletterConfirmForm } from '@/components/NewsletterConfirmForm'
 import { verifyNewsletterConfirmToken } from '@/lib/newsletter/token'
 
 type ConfirmPageProps = {
