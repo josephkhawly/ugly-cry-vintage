@@ -34,6 +34,23 @@ function configureOpenCartActionNow() {
   return true
 }
 
+function retryConfigureOpenCartAction() {
+  openCartActionRetryQueued = false
+  configureOpenCartAction()
+}
+
+function onStandardActionsScriptLoad(event: Event) {
+  if (
+    !(event.target instanceof HTMLScriptElement) ||
+    !event.target.src.includes('standard-actions')
+  ) {
+    return
+  }
+
+  document.removeEventListener('load', onStandardActionsScriptLoad, true)
+  retryConfigureOpenCartAction()
+}
+
 export function configureOpenCartAction() {
   if (typeof document === 'undefined' || openCartActionConfigured) return
   if (configureOpenCartActionNow()) return
@@ -42,26 +59,17 @@ export function configureOpenCartAction() {
   openCartActionRetryQueued = true
 
   if (document.readyState === 'loading') {
-    document.addEventListener(
-      STANDARD_ACTIONS_READY_EVENT,
-      () => {
-        openCartActionRetryQueued = false
-        configureOpenCartAction()
-      },
-      { once: true },
-    )
-    return
+    document.addEventListener(STANDARD_ACTIONS_READY_EVENT, retryConfigureOpenCartAction, {
+      once: true,
+    })
   }
 
-  const deadline = Date.now() + 10_000
-  const retry = () => {
-    if (configureOpenCartActionNow() || Date.now() > deadline) {
-      openCartActionRetryQueued = false
-      return
-    }
-    window.setTimeout(retry, 50)
+  document.addEventListener('load', onStandardActionsScriptLoad, true)
+
+  const script = document.querySelector('script[src*="standard-actions"]')
+  if (script instanceof HTMLScriptElement) {
+    script.addEventListener('load', retryConfigureOpenCartAction, { once: true })
   }
-  retry()
 }
 
 configureOpenCartAction()
