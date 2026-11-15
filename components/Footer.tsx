@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { BsSubstack } from 'react-icons/bs'
 import { FaInstagram } from 'react-icons/fa'
 import { NewsletterForm } from '@/components/newsletter/NewsletterForm'
@@ -11,15 +12,17 @@ export default async function Footer() {
     <footer className='container mx-auto flex flex-col gap-6 p-6 lg:flex-row lg:items-stretch lg:justify-between lg:p-12'>
       <div className='contents lg:flex lg:flex-col lg:justify-between lg:gap-6'>
         <div className='order-1 flex flex-col items-start gap-3 lg:order-none lg:flex-row lg:items-center lg:gap-5'>
-          {menu.map((item) => (
-            <a
-              key={item.title}
-              href={item.path}
-              className='font-subheading text-lg hover:underline'
-            >
-              {item.title}
-            </a>
-          ))}
+          {menu.map((item) =>
+            /^https?:\/\//i.test(item.path) ? (
+              <a className='font-subheading text-lg hover:underline' href={item.path} key={item.title}>
+                {item.title}
+              </a>
+            ) : (
+              <Link className='font-subheading text-lg hover:underline' href={item.path} key={item.title}>
+                {item.title}
+              </Link>
+            ),
+          )}
           <div className='flex items-center gap-5'>
             <a
               aria-label='Instagram'
