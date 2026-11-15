@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
-import { ProductListing, resolveSort } from '@/components/ProductListing'
+import { ProductListing, ProductListingSkeleton, resolveSort } from '@/components/ProductListing'
 import { parsePlpFilters } from '@/lib/plp-filters'
 import { getPlpListing } from '@/lib/shopify'
 
@@ -38,14 +38,5 @@ export default function Shop(props: ShopContentProps) {
     <Suspense fallback={<ProductListingSkeleton title='Everything' />}>
       <ShopContent searchParams={props.searchParams} />
     </Suspense>
-  )
-}
-
-function ProductListingSkeleton({ title }: { title: string }) {
-  return (
-    <section>
-      <h1 className='mb-8 pt-16 text-center text-4xl sm:pt-24 sm:text-6xl'>{title}</h1>
-      <p className='px-2 py-3 text-lg'>Loading products…</p>
-    </section>
   )
 }

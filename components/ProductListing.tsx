@@ -13,6 +13,10 @@ interface ProductListingProps {
   title: string
 }
 
+interface ProductListingSkeletonProps {
+  title?: string
+}
+
 export function ProductListing({
   actionPath,
   facets,
@@ -39,6 +43,17 @@ export function ProductListing({
           ))}
         </ul>
       )}
+    </section>
+  )
+}
+
+export function ProductListingSkeleton({ title }: ProductListingSkeletonProps) {
+  return (
+    <section>
+      {title ? (
+        <h1 className='mb-8 pt-16 text-center text-4xl sm:pt-24 sm:text-6xl'>{title}</h1>
+      ) : null}
+      <p className='px-2 py-3 text-lg'>Loading products…</p>
     </section>
   )
 }
