@@ -9,7 +9,7 @@ import { ProductAccordions } from '@/components/ProductAccordions'
 import { ProductAttributes } from '@/components/ProductAttributes'
 import Prose from '@/components/Prose'
 import { HIDDEN_PRODUCT_TAG } from '@/lib/constants'
-import { resolveProductImage, resolveProductImages } from '@/lib/product-image'
+import { resolveProductImage } from '@/lib/product-image'
 import { getProduct } from '@/lib/shopify'
 
 interface PageProps {
@@ -85,7 +85,7 @@ async function ProductDetails({ params }: PageProps) {
       />
       <div className='container mx-auto grid grid-flow-row grid-cols-1 items-start gap-6 px-6 pt-16 pb-12 sm:pt-24 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:gap-8 lg:px-12'>
         <div className='w-full min-w-0'>
-          <ImageGallery images={resolveProductImages(product.images, product.title)} />
+          <ImageGallery images={product.images} />
         </div>
         <div className='font-subheading w-full min-w-0'>
           <h1 className='font-body mb-1 text-[1.75rem] tracking-wide lg:text-[2.125rem]'>
