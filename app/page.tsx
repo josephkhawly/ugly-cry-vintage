@@ -10,8 +10,6 @@ export default function Home() {
         backgroundImage='/drop2.png'
         backgroundImageAlt='Vintage sweaters'
         href='/shop/new-arrivals'
-        objectFit='contain'
-        overlayOpacity={0}
       />
       <Suspense fallback={<ProductCarouselSkeleton />}>
         <ProductCarousel collection='new-arrivals' />
