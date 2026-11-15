@@ -39,7 +39,7 @@ export default function RootLayout({
       >
         <Script
           src='https://cdn.shopify.com/storefront/standard-actions.js'
-          strategy='afterInteractive'
+          strategy='beforeInteractive'
           type='module'
         />
         <Suspense fallback={null}>
