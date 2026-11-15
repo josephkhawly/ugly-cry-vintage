@@ -30,18 +30,3 @@ export const getPageQuery = gql(
 `,
   [pageFragment],
 )
-
-export const getPagesQuery = gql(
-  `
-  query getPages {
-    pages(first: 100) {
-      edges {
-        node {
-          ...page
-        }
-      }
-    }
-  }
-`,
-  [pageFragment],
-)

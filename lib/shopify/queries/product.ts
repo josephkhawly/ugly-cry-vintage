@@ -40,14 +40,3 @@ export const getProductsQuery = gql(
 `,
   [productFragment],
 )
-
-export const getProductRecommendationsQuery = gql(
-  `
-  query getProductRecommendations($productId: ID!) {
-    productRecommendations(productId: $productId) {
-      ...product
-    }
-  }
-`,
-  [productFragment],
-)

@@ -13,11 +13,6 @@ declare module '*.jpeg' {
   export default src
 }
 
-declare module '*.gif' {
-  const src: import('next/image').StaticImageData
-  export default src
-}
-
 declare module '*.webp' {
   const src: import('next/image').StaticImageData
   export default src

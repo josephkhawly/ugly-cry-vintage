@@ -30,21 +30,6 @@ export const getCollectionQuery = gql(
   [collectionFragment],
 )
 
-export const getCollectionsQuery = gql(
-  `
-  query getCollections {
-    collections(first: 100, sortKey: TITLE) {
-      edges {
-        node {
-          ...collection
-        }
-      }
-    }
-  }
-`,
-  [collectionFragment],
-)
-
 export const getCollectionProductsQuery = gql(
   `
   query getCollectionProducts(
