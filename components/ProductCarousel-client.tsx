@@ -1,17 +1,17 @@
 'use client'
 
+import type * as React from 'react'
 import { useRef } from 'react'
 import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2'
-import ProductCard from '@/components/ProductCard'
+
 import { PageContainer } from '@/components/PageContainer'
-import type { Product } from '@/lib/shopify/types'
 
 interface ProductCarouselClientProps {
+  children: React.ReactNode
   heading: string
-  products: Product[]
 }
 
-export function ProductCarouselClient({ heading, products }: ProductCarouselClientProps) {
+export function ProductCarouselClient({ children, heading }: ProductCarouselClientProps) {
   const scrollerRef = useRef<HTMLUListElement>(null)
 
   function scroll(direction: -1 | 1) {
@@ -19,8 +19,6 @@ export function ProductCarouselClient({ heading, products }: ProductCarouselClie
     if (!el) return
     el.scrollBy({ behavior: 'smooth', left: direction * el.clientWidth * 0.75 })
   }
-
-  if (products.length === 0) return null
 
   return (
     <section className='py-12 md:py-16'>
@@ -52,9 +50,7 @@ export function ProductCarouselClient({ heading, products }: ProductCarouselClie
           className='flex snap-x snap-mandatory scrollbar-none gap-4 overflow-x-auto scroll-smooth pb-2 [-ms-overflow-style:none] md:gap-6 [&_li]:w-44 [&_li]:shrink-0 [&_li]:snap-start md:[&_li]:w-56 [&::-webkit-scrollbar]:hidden'
           ref={scrollerRef}
         >
-          {products.map((product) => (
-            <ProductCard key={product.handle} product={product} />
-          ))}
+          {children}
         </ul>
       </PageContainer>
     </section>
