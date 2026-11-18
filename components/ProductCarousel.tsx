@@ -1,3 +1,4 @@
+import ProductCard from '@/components/ProductCard'
 import { ProductCarouselClient } from '@/components/ProductCarousel-client'
 import { getCollection, getCollectionProducts } from '@/lib/shopify'
 
@@ -13,5 +14,14 @@ export async function ProductCarousel({ collection }: ProductCarouselProps) {
 
   if (!collectionData) return null
 
-  return <ProductCarouselClient heading={collectionData.title} products={products.slice(0, 12)} />
+  const items = products.slice(0, 12)
+  if (items.length === 0) return null
+
+  return (
+    <ProductCarouselClient heading={collectionData.title}>
+      {items.map((product) => (
+        <ProductCard key={product.handle} product={product} />
+      ))}
+    </ProductCarouselClient>
+  )
 }

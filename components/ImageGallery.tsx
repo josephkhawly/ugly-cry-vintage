@@ -5,7 +5,6 @@ import Image from 'next/image'
 import { Fragment, useEffect, useRef, useState, type MouseEvent } from 'react'
 import { HiChevronDown, HiChevronUp, HiOutlineXMark } from 'react-icons/hi2'
 
-import { resolveProductImages } from '@/lib/product-image'
 import type { Image as ImageType } from '@/lib/shopify/types'
 
 interface ImageGalleryProps {
@@ -31,16 +30,14 @@ const ZOOM_SCALE = 2.5
 export function ImageGallery({ images }: ImageGalleryProps) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const galleryImages = resolveProductImages(images)
-
-  const selectedImage = galleryImages[selectedIndex]
+  const selectedImage = images[selectedIndex]
 
   return (
     <div className='w-full min-w-0'>
       <div className='flex gap-3 md:gap-4'>
-        {galleryImages.length > 1 ? (
+        {images.length > 1 ? (
           <ThumbnailStrip
-            images={galleryImages}
+            images={images}
             onSelect={setSelectedIndex}
             selectedIndex={selectedIndex}
           />
@@ -64,7 +61,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
       </div>
 
       <ImageLightbox
-        images={galleryImages}
+        images={images}
         isOpen={isLightboxOpen}
         onClose={() => setIsLightboxOpen(false)}
         onSelect={setSelectedIndex}
